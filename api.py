@@ -3,6 +3,7 @@ import os
 import cv2
 import dlib
 import csv
+import uvicorn
 import numpy as np
 import face_recognition
 from datetime import datetime
@@ -10,6 +11,11 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from io import BytesIO
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    uvicorn.run("api:app", host="0.0.0.0", port=port)
 
 # ==== CONFIG ====
 PREDICTOR_PATH = "shape_predictor.dat"
