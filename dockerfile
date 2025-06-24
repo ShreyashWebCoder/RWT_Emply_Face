@@ -1,6 +1,7 @@
-FROM python:3.10-slim
+# Use official Python 3.9 base image
+FROM python:3.9-slim
 
-# System dependencies
+# Install system dependencies needed for dlib, face_recognition, opencv
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -15,17 +16,18 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Copy dependencies
+# Copy requirements and install Python packages
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Upgrade pip and install Python dependencies
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
+# Copy all project files
 COPY . .
 
-# Expose port (Render uses 10000)
+# Expose the port Render will use
 EXPOSE 10000
 
-# Start the FastAPI server
+# Run the FastAPI app with Uvicorn
 CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "10000"]
