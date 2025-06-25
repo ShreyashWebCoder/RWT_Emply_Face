@@ -1,7 +1,6 @@
-# Use official Python 3.9 image
 FROM python:3.9-slim
 
-# Install system dependencies for face_recognition & OpenCV
+# Install dependencies for OpenCV & face_recognition
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -13,26 +12,20 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /app
 
-# Copy and install Python dependencies
 COPY requirements.txt .
 
-# Upgrade pip
 RUN pip install --upgrade pip
 
-# ✅ Install prebuilt dlib (don't put this in requirements.txt)
+# ✅ Pre-install prebuilt dlib binary so it doesn't try to build from source
 RUN pip install dlib-bin==19.24.6
 
-# ✅ Install remaining packages (make sure dlib is removed from requirements.txt)
+# ✅ Install remaining dependencies (excluding dlib)
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
 COPY . .
 
-# Expose Render-compatible port
 EXPOSE 10000
 
-# Run FastAPI app
 CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "10000"]
