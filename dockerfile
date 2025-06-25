@@ -1,7 +1,7 @@
-# Use official Python 3.9 base image
+# Use official Python 3.9 image
 FROM python:3.9-slim
 
-# Install system dependencies
+# Install system dependencies for face_recognition & OpenCV
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -11,32 +11,28 @@ RUN apt-get update && apt-get install -y \
     libx11-dev \
     libgtk-3-dev \
     git \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements file
+# Copy and install Python dependencies
 COPY requirements.txt .
 
 # Upgrade pip
 RUN pip install --upgrade pip
 
-# ✅ Download and install prebuilt dlib wheel from a URL (or local path)
-# Replace with your actual .whl URL or place it in your project directory
-# Example from a GitHub raw link or S3/Render-compatible host
-ADD https://your-bucket-url.com/dlib-19.24.0-cp39-cp39-manylinux2014_x86_64.whl /tmp/dlib.whl
-RUN pip install /tmp/dlib.whl
+# ✅ Install prebuilt dlib (don't put this in requirements.txt)
+RUN pip install dlib-bin==19.24.6
 
-# ✅ Now install remaining packages (excluding dlib in requirements.txt)
+# ✅ Install remaining packages (make sure dlib is removed from requirements.txt)
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app files
+# Copy project files
 COPY . .
 
-# Expose port for Render
+# Expose Render-compatible port
 EXPOSE 10000
 
-# Run app
+# Run FastAPI app
 CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "10000"]
