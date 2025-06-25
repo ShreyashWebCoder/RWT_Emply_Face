@@ -1,6 +1,6 @@
 FROM python:3.9-slim
 
-# Install dependencies for OpenCV & face_recognition
+# Install system-level dependencies for dlib, OpenCV, face_recognition
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -16,16 +16,18 @@ WORKDIR /app
 
 COPY requirements.txt .
 
+# Upgrade pip
 RUN pip install --upgrade pip
 
-# ✅ Pre-install prebuilt dlib binary so it doesn't try to build from source
-RUN pip install dlib-bin==19.24.6
+# ✅ Install prebuilt dlib from PyPI (avoids build errors)
+RUN pip install dlib==19.24.0 --only-binary :all:
 
-# ✅ Install remaining dependencies (excluding dlib)
+# ✅ Install remaining packages (make sure dlib is NOT in requirements.txt)
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
 EXPOSE 10000
 
+# Start FastAPI server
 CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "10000"]
